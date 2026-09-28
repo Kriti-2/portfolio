@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=VT323&display=swap');
+
+:root {
+  --bg-color: #fbfbfb;
+  --line-color: #e5e7eb;
+  --text-main: #1f2937;
+  --yellow: #fcd34d;
+  --green: #4ade80;
+  --pink: #f472b6;
+  --blue: #3b82f6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  background-image: linear-gradient(var(--line-color) 1px, transparent 1px);
+  background-size: 100% 32px;
+  background-position: 0 32px;
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+.handwriting {
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.pixel-font {
+  font-family: 'VT323', monospace;
+  letter-spacing: 2px;
+}
+
+/* Notebook margin line */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 5%;
+  bottom: 0;
+  width: 2px;
+  background-color: #fca5a5;
+  z-index: -1;
+}
+
+@media (min-width: 768px) {
+  body::before {
+    left: 10%;
+  }
+}
