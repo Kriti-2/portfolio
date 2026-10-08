@@ -1,4 +1,4 @@
-import campusFindLogo from '../assets/campus-find-logo.jpg';
+import campusFindLogo from '../assets/campus-find-logo.png';
 
 export const projectsData = [
   {

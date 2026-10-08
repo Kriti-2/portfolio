@@ -89,32 +89,7 @@ export default function InteractiveProjectCard({ project }) {
       className={`interactive-project-card${B ? ' branded-card' : ''}`}
       style={{ boxShadow: `7px 7px 0 ${project.shadow}` }}
     >
-      {/* ── Campus Find Brand Logo Header ── */}
-      {B && (
-        <div
-          className="brand-logo-header"
-          style={{ background: B.surface, borderBottom: `2px solid ${B.lavender}` }}
-        >
-          <div className="brand-logo-left">
-            <img
-              src={B.logo}
-              alt={`${project.title} logo`}
-              className="brand-logo-img"
-            />
-          </div>
-          <div className="brand-identity-right">
-            <span
-              className="brand-product-label mono-font"
-              style={{ color: B.accent, borderColor: B.mid, background: B.lavender }}
-            >
-              PRODUCT
-            </span>
-            <p className="brand-tagline handwriting" style={{ color: B.accent }}>
-              "Lost something? Find it here."
-            </p>
-          </div>
-        </div>
-      )}
+
 
       {/* ── Top Banner: Number + Title + Tags ── */}
       <div className="proj-card-top-bar" style={B ? { background: B.surface } : {}}>
@@ -153,6 +128,15 @@ export default function InteractiveProjectCard({ project }) {
             </span>
           ))}
         </div>
+        {/* ── Brand Panel: Logo + short description ── */}
+        {B && (
+          <div className="brand-panel" style={{ background: B.surface, borderColor: B.lavender, borderStyle: 'solid', borderWidth: '2px' }}>
+            <img src={B.logo} alt={`${project.title} logo`} className="brand-panel-logo" />
+            <p className="brand-panel-description" style={{ color: B.accent }}>
+              A simple way for students to report lost items, submit claims, and reconnect them with their owners.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* ── Mode Selector Bar ── */}
