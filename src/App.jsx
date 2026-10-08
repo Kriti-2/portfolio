@@ -86,7 +86,13 @@ export default function App() {
     <div className="app-container">
 
       {/* ── Notebook Intro (shown once per session) ── */}
-      {showIntro && <NotebookIntro onEnter={handleIntroEnter} />}
+      {showIntro && (
+        <NotebookIntro 
+          onEnter={handleIntroEnter} 
+          theme={theme} 
+          onToggleTheme={toggleTheme} 
+        />
+      )}
 
       {/* ── Recruiter Mode Modal View (30-Second Skim) ── */}
       {recruiterMode && (

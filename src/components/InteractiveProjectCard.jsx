@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Play, Bell, MapPin, ExternalLink, ChevronRight, 
   CheckCircle2, Sparkles, RefreshCw, Send, AlertTriangle, Lightbulb, Pin
@@ -62,26 +62,42 @@ export default function InteractiveProjectCard({ project }) {
 
   const selectedStep = project.howItWorks[selectedStepIdx] || project.howItWorks[0];
 
+  // ── Dark mode detection ──
+  const [isDark, setIsDark] = useState(
+    () => document.documentElement.getAttribute('data-theme') === 'dark'
+  );
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  // Dark-mode adapted surfaces for branded cards
+  const brandSurface  = B ? (isDark ? 'rgba(124, 58, 237, 0.12)' : B.surface)  : undefined;
+  const brandLavender = B ? (isDark ? 'rgba(124, 58, 237, 0.22)' : B.lavender) : undefined;
+
   // ── Derived inline styles for branded elements ──
   const brandedStepActive = B ? {
-    background: B.lavender,
-    color: B.accent,
-    borderColor: B.accent,
-    boxShadow: `3px 3px 0 ${B.accent}`,
+    background: isDark ? '#7c3aed' : B.lavender,
+    color: isDark ? '#ffffff' : B.accent,
+    borderColor: isDark ? '#c4b5fd' : B.accent,
+    boxShadow: `3px 3px 0 ${isDark ? '#000000' : B.accent}`,
   } : {};
 
   const brandedModeBtnActive = B ? {
-    background: B.lavender,
-    color: B.accent,
-    borderColor: B.accent,
-    boxShadow: `3px 3px 0 ${B.accent}`,
+    background: isDark ? 'rgba(124, 58, 237, 0.3)' : B.lavender,
+    color: isDark ? '#c4b5fd' : B.accent,
+    borderColor: isDark ? '#a78bfa' : B.accent,
+    boxShadow: `3px 3px 0 ${isDark ? '#000000' : B.accent}`,
   } : {};
 
   const brandedStoryBtnActive = B ? {
-    background: B.accent,
+    background: isDark ? '#7c3aed' : B.accent,
     color: '#fff',
-    borderColor: '#111',
-    boxShadow: `3px 3px 0 #111`,
+    borderColor: isDark ? '#a78bfa' : '#111',
+    boxShadow: `3px 3px 0 ${isDark ? '#000000' : '#111'}`,
   } : {};
 
   return (
@@ -92,17 +108,17 @@ export default function InteractiveProjectCard({ project }) {
 
 
       {/* ── Top Banner: Number + Title + Tags ── */}
-      <div className="proj-card-top-bar" style={B ? { background: B.surface } : {}}>
+      <div className="proj-card-top-bar" style={B ? { background: brandSurface } : {}}>
         <div className="proj-title-cluster">
-          <span className="proj-number pixel-font" style={B ? { color: B.mid } : {}}>
+          <span className="proj-number pixel-font" style={B ? { color: isDark ? '#c4b5fd' : B.mid } : {}}>
             {project.num}
           </span>
           <div>
-            {/* Title: "Campus" plain + "Find" purple */}
+            {/* Title: plain + accented word */}
             {B ? (
-              <h3 className="proj-main-title">
+              <h3 className="proj-main-title" style={{ color: 'var(--text-main)' }}>
                 Campus{' '}
-                <span style={{ color: B.accent }}>Find</span>
+                <span style={{ color: isDark ? '#c084fc' : B.accent }}>Find</span>
               </h3>
             ) : (
               <h3 className="proj-main-title">{project.title}</h3>
@@ -118,10 +134,10 @@ export default function InteractiveProjectCard({ project }) {
               key={tag}
               className="proj-tag-pill"
               style={B ? {
-                background: B.lavender,
-                color: B.accent,
-                borderColor: B.mid,
-                boxShadow: `2px 2px 0 ${B.accent}33`,
+                background: isDark ? 'rgba(124, 58, 237, 0.22)' : B.lavender,
+                color: isDark ? '#c4b5fd' : B.accent,
+                borderColor: isDark ? 'rgba(167, 139, 250, 0.45)' : B.mid,
+                boxShadow: `2px 2px 0 ${isDark ? 'rgba(0,0,0,0.5)' : `${B.accent}33`}`,
               } : {}}
             >
               {tag}
@@ -130,9 +146,19 @@ export default function InteractiveProjectCard({ project }) {
         </div>
         {/* ── Brand Panel: Logo + short description ── */}
         {B && (
-          <div className="brand-panel" style={{ background: B.surface, borderColor: B.lavender, borderStyle: 'solid', borderWidth: '2px' }}>
-            <img src={B.logo} alt={`${project.title} logo`} className="brand-panel-logo" />
-            <p className="brand-panel-description" style={{ color: B.accent }}>
+          <div className="brand-panel" style={{
+            background: isDark ? 'rgba(124, 58, 237, 0.15)' : B.surface,
+            borderColor: isDark ? 'rgba(167, 139, 250, 0.35)' : B.lavender,
+            borderStyle: 'solid',
+            borderWidth: '2px'
+          }}>
+            <img
+              src={B.logo}
+              alt={`${project.title} logo`}
+              className="brand-panel-logo"
+              style={isDark ? { background: '#ffffff', padding: '3px', borderRadius: '6px' } : {}}
+            />
+            <p className="brand-panel-description" style={{ color: isDark ? '#d8b4fe' : B.accent }}>
               A simple way for students to report lost items, submit claims, and reconnect them with their owners.
             </p>
           </div>
@@ -142,7 +168,10 @@ export default function InteractiveProjectCard({ project }) {
       {/* ── Mode Selector Bar ── */}
       <div
         className="proj-mode-selector-bar"
-        style={B ? { background: `${B.surface}cc`, borderBottom: `2px dashed ${B.lavender}` } : {}}
+        style={B ? {
+          background: isDark ? 'rgba(124, 58, 237, 0.08)' : `${B.surface}cc`,
+          borderBottom: isDark ? '2px dashed rgba(167, 139, 250, 0.3)' : `2px dashed ${B.lavender}`
+        } : {}}
       >
         <div className="proj-mode-buttons">
           {/* SEE HOW IT WORKS — purple filled when active for branded projects */}
@@ -181,8 +210,8 @@ export default function InteractiveProjectCard({ project }) {
             rel="noreferrer"
             className="proj-repo-link"
             style={B ? {
-              borderColor: B.mid,
-              color: B.accent,
+              borderColor: isDark ? 'rgba(167, 139, 250, 0.45)' : B.mid,
+              color: isDark ? '#c4b5fd' : B.accent,
             } : {}}
             title="Source Code"
           >
@@ -232,38 +261,38 @@ export default function InteractiveProjectCard({ project }) {
           <div
             className="story-step-explanation-box"
             style={B ? {
-              background: B.surface,
-              borderColor: B.lavender,
+              background: isDark ? 'rgba(124, 58, 237, 0.12)' : B.surface,
+              borderColor: isDark ? 'rgba(167, 139, 250, 0.35)' : B.lavender,
             } : {}}
           >
             <div className="step-exp-header">
               <span
                 className="step-exp-badge mono-font"
                 style={B ? {
-                  background: B.lavender,
-                  color: B.accent,
-                  border: `1px solid ${B.mid}`,
+                  background: isDark ? 'rgba(124, 58, 237, 0.3)' : B.lavender,
+                  color: isDark ? '#c4b5fd' : B.accent,
+                  border: isDark ? '1px solid #8b5cf6' : `1px solid ${B.mid}`,
                 } : {}}
               >
                 STEP 0{selectedStep.step}
               </span>
-              <h4 className="step-exp-title">{selectedStep.title}</h4>
+              <h4 className="step-exp-title" style={{ color: 'var(--text-main)' }}>{selectedStep.title}</h4>
             </div>
 
-            <p className="step-simple-text">{selectedStep.simple}</p>
+            <p className="step-simple-text" style={{ color: isDark ? '#e2e8f0' : undefined }}>{selectedStep.simple}</p>
 
             {/* Under the hood — purple accent for branded projects */}
             <div
               className="step-tech-disclosure"
-              style={B ? { borderTopColor: B.lavender } : {}}
+              style={B ? { borderTopColor: isDark ? 'rgba(167, 139, 250, 0.3)' : B.lavender } : {}}
             >
               <span className="mono-font tech-tag-label">Under the hood:</span>
               <span
                 className="mono-font tech-tag-val"
                 style={B ? {
-                  color: B.accent,
-                  background: B.lavender,
-                  border: `1px solid ${B.mid}`,
+                  color: isDark ? '#c4b5fd' : B.accent,
+                  background: isDark ? 'rgba(124, 58, 237, 0.25)' : B.lavender,
+                  border: isDark ? '1px solid rgba(167, 139, 250, 0.45)' : `1px solid ${B.mid}`,
                 } : {}}
               >
                 {selectedStep.tech}
@@ -281,7 +310,11 @@ export default function InteractiveProjectCard({ project }) {
           <div className="try-it-header">
             <span
               className="interactive-badge mono-font"
-              style={B ? { color: B.accent } : {}}
+              style={B ? {
+                color: isDark ? '#c4b5fd' : B.accent,
+                borderColor: isDark ? '#a78bfa' : undefined,
+                background: isDark ? 'rgba(124, 58, 237, 0.2)' : undefined
+              } : {}}
             >
               ● INTERACTIVE DEMONSTRATION
             </span>
@@ -300,17 +333,17 @@ export default function InteractiveProjectCard({ project }) {
                     onChange={(e) => setTestItemName(e.target.value)}
                     placeholder="e.g. Blue Umbrella in Tech Park"
                     className="demo-text-input mono-font"
-                    style={B ? { borderColor: B.lavender } : {}}
+                    style={B ? { borderColor: isDark ? 'rgba(167, 139, 250, 0.4)' : B.lavender } : {}}
                   />
                   <button
                     onClick={handleSendTestNotification}
                     disabled={isSendingAlert}
                     className="demo-action-btn"
                     style={B ? {
-                      background: B.accent,
+                      background: isDark ? '#7c3aed' : B.accent,
                       color: '#fff',
-                      border: '2.5px solid #111',
-                      boxShadow: '4px 4px 0 #111',
+                      border: isDark ? '2.5px solid #a78bfa' : '2.5px solid #111',
+                      boxShadow: isDark ? '4px 4px 0 #000' : '4px 4px 0 #111',
                       padding: '0.55rem 1.1rem',
                       borderRadius: '6px',
                       fontWeight: 800,
@@ -335,9 +368,9 @@ export default function InteractiveProjectCard({ project }) {
                 <div
                   className="simulated-alert-box animated-alert"
                   style={B ? {
-                    background: B.surface,
-                    borderColor: B.mid,
-                    borderLeftColor: B.accent,
+                    background: isDark ? 'rgba(124, 58, 237, 0.14)' : B.surface,
+                    borderColor: isDark ? '#8b5cf6' : B.mid,
+                    borderLeftColor: isDark ? '#c4b5fd' : B.accent,
                     borderLeftWidth: '4px',
                   } : {}}
                 >
@@ -353,7 +386,11 @@ export default function InteractiveProjectCard({ project }) {
                     <span>Transport: {receivedAlert.channel}</span>
                     <span
                       className="badge-online"
-                      style={B ? { background: B.lavender, color: B.accent, borderColor: B.mid } : {}}
+                      style={B ? {
+                        background: isDark ? 'rgba(124, 58, 237, 0.3)' : B.lavender,
+                        color: isDark ? '#c4b5fd' : B.accent,
+                        borderColor: isDark ? 'rgba(167, 139, 250, 0.45)' : B.mid
+                      } : {}}
                     >
                       STATUS: DELIVERED
                     </span>
@@ -430,36 +467,45 @@ export default function InteractiveProjectCard({ project }) {
         <div className="proj-view-container notebook-notes-view">
           <div className="notebook-stickers-grid">
             <div className={`notebook-sticky sticky-why${B ? ' branded-sticky' : ''}`}
-              style={B ? { background: B.surface, borderColor: B.lavender } : {}}
+              style={B ? {
+                background: isDark ? 'rgba(124, 58, 237, 0.18)' : B.surface,
+                borderColor: isDark ? 'rgba(167, 139, 250, 0.4)' : B.lavender
+              } : {}}
             >
-              <div className="sticky-pin" style={B ? { background: B.mid } : {}} />
+              <div className="sticky-pin" style={B ? { background: isDark ? '#8b5cf6' : B.mid } : {}} />
               <div className="sticky-header">
-                <Lightbulb size={16} className="sticky-icon" style={B ? { color: B.accent } : {}} />
-                <h5 className="sticky-title mono-font" style={B ? { color: B.accent } : {}}>WHY I BUILT THIS</h5>
+                <Lightbulb size={16} className="sticky-icon" style={B ? { color: isDark ? '#c4b5fd' : B.accent } : {}} />
+                <h5 className="sticky-title mono-font" style={B ? { color: isDark ? '#c4b5fd' : B.accent } : {}}>WHY I BUILT THIS</h5>
               </div>
-              <p className="sticky-text">{project.notebookNotes.why}</p>
+              <p className="sticky-text" style={{ color: isDark ? '#e2e8f0' : undefined }}>{project.notebookNotes.why}</p>
             </div>
 
             <div className={`notebook-sticky sticky-learned${B ? ' branded-sticky' : ''}`}
-              style={B ? { background: '#fff', borderColor: B.lavender } : {}}
+              style={B ? {
+                background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#fff',
+                borderColor: isDark ? 'rgba(167, 139, 250, 0.35)' : B.lavender
+              } : {}}
             >
-              <div className="sticky-pin" style={B ? { background: B.accent } : {}} />
+              <div className="sticky-pin" style={B ? { background: isDark ? '#a78bfa' : B.accent } : {}} />
               <div className="sticky-header">
-                <Pin size={16} className="sticky-icon" style={B ? { color: B.mid } : {}} />
-                <h5 className="sticky-title mono-font" style={B ? { color: B.mid } : {}}>WHAT I LEARNED</h5>
+                <Pin size={16} className="sticky-icon" style={B ? { color: isDark ? '#c4b5fd' : B.mid } : {}} />
+                <h5 className="sticky-title mono-font" style={B ? { color: isDark ? '#c4b5fd' : B.mid } : {}}>WHAT I LEARNED</h5>
               </div>
-              <p className="sticky-text">{project.notebookNotes.learned}</p>
+              <p className="sticky-text" style={{ color: isDark ? '#e2e8f0' : undefined }}>{project.notebookNotes.learned}</p>
             </div>
 
             <div className={`notebook-sticky sticky-fixed${B ? ' branded-sticky' : ''}`}
-              style={B ? { background: B.lavender, borderColor: B.mid } : {}}
+              style={B ? {
+                background: isDark ? 'rgba(124, 58, 237, 0.25)' : B.lavender,
+                borderColor: isDark ? 'rgba(167, 139, 250, 0.5)' : B.mid
+              } : {}}
             >
-              <div className="sticky-pin" style={B ? { background: B.accent } : {}} />
+              <div className="sticky-pin" style={B ? { background: isDark ? '#a78bfa' : B.accent } : {}} />
               <div className="sticky-header">
-                <AlertTriangle size={16} className="sticky-icon" style={B ? { color: B.accent } : {}} />
-                <h5 className="sticky-title mono-font" style={B ? { color: B.accent } : {}}>SOMETHING I HAD TO FIX</h5>
+                <AlertTriangle size={16} className="sticky-icon" style={B ? { color: isDark ? '#d8b4fe' : B.accent } : {}} />
+                <h5 className="sticky-title mono-font" style={B ? { color: isDark ? '#d8b4fe' : B.accent } : {}}>SOMETHING I HAD TO FIX</h5>
               </div>
-              <p className="sticky-text">{project.notebookNotes.fixed}</p>
+              <p className="sticky-text" style={{ color: isDark ? '#e2e8f0' : undefined }}>{project.notebookNotes.fixed}</p>
             </div>
           </div>
         </div>

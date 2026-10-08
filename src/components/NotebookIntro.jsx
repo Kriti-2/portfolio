@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Sun, Moon } from 'lucide-react';
 
 /*
   NotebookIntro — Entry screen shown before the main portfolio.
   Props:
-    onEnter()   — called when visitor clicks "OPEN NOTEBOOK" or "skip"
+    onEnter()       — called when visitor clicks "OPEN NOTEBOOK" or "skip"
+    theme           — 'light' | 'dark'
+    onToggleTheme() — toggles theme between light and dark
 */
-export default function NotebookIntro({ onEnter }) {
+export default function NotebookIntro({ onEnter, theme = 'light', onToggleTheme }) {
   const [phase, setPhase] = useState('idle'); // 'idle' | 'opening' | 'done'
 
   const ruledLines = Array.from({ length: 20 }, (_, i) => i);
@@ -39,10 +42,25 @@ export default function NotebookIntro({ onEnter }) {
       {/* Left red margin line */}
       <div className="nb-margin-line" aria-hidden="true" />
 
-      {/* Skip — top right */}
-      <button className="nb-skip-btn" onClick={onEnter} aria-label="Skip intro">
-        skip →
-      </button>
+      {/* Top right actions: Theme toggle + Skip */}
+      <div className="nb-top-actions">
+        {onToggleTheme && (
+          <button
+            className="nb-theme-btn"
+            onClick={onToggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+          >
+            {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
+            <span className="nb-theme-label mono-font">
+              {theme === 'light' ? 'DARK' : 'LIGHT'}
+            </span>
+          </button>
+        )}
+        <button className="nb-skip-btn" onClick={onEnter} aria-label="Skip intro">
+          skip →
+        </button>
+      </div>
 
       {/* Main content — centred, compact, above-fold */}
       <div className="nb-intro-content">
