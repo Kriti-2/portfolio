@@ -21,6 +21,7 @@ import InteractiveProjectCard from './components/InteractiveProjectCard';
 import BuildNotes from './components/BuildNotes';
 import TerminalConsole from './components/TerminalConsole';
 import RecruiterMode from './components/RecruiterMode';
+import NotebookIntro from './components/NotebookIntro';
 
 /* ── Inline SVG icons ── */
 const Github = ({ size = 20, ...p }) => (
@@ -43,6 +44,16 @@ export default function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('portfolio-theme') || 'light';
   });
+
+  // Show intro only once per browser session (sessionStorage = cleared on tab close)
+  const [showIntro, setShowIntro] = useState(() => {
+    return !sessionStorage.getItem('nb-intro-seen');
+  });
+
+  const handleIntroEnter = () => {
+    sessionStorage.setItem('nb-intro-seen', '1');
+    setShowIntro(false);
+  };
 
   const [recruiterMode, setRecruiterMode] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -73,6 +84,9 @@ export default function App() {
 
   return (
     <div className="app-container">
+
+      {/* ── Notebook Intro (shown once per session) ── */}
+      {showIntro && <NotebookIntro onEnter={handleIntroEnter} />}
 
       {/* ── Recruiter Mode Modal View (30-Second Skim) ── */}
       {recruiterMode && (
