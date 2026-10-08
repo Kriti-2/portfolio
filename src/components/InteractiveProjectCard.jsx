@@ -12,28 +12,26 @@ const GithubIcon = ({ size = 15 }) => (
 );
 
 export default function InteractiveProjectCard({ project }) {
-  // Active view: 'story' (How it works), 'try' (Interactive demo), 'notes' (Notebook details)
+  // Whether this project has its own brand identity
+  const B = project.brand || null;
+
+  // Active view: 'story' | 'try' | 'notes'
   const [activeView, setActiveView] = useState('story');
-  
-  // Selected step in visual story
   const [selectedStepIdx, setSelectedStepIdx] = useState(0);
 
-  // Mini-demo states
-  // Campus Find:
+  // Campus Find mini-demo states
   const [testItemName, setTestItemName] = useState(project.tryIt?.defaultItem || 'Blue Umbrella in Tech Park');
   const [receivedAlert, setReceivedAlert] = useState(null);
   const [isSendingAlert, setIsSendingAlert] = useState(false);
 
-  // MargSense:
+  // MargSense mini-demo states
   const [selectedZone, setSelectedZone] = useState(project.tryIt?.zones?.[0]?.id || 'z1');
   const [predictedResult, setPredictedResult] = useState(null);
   const [isPredicting, setIsPredicting] = useState(false);
 
-  // Trigger test notification for Campus Find
   const handleSendTestNotification = () => {
     setIsSendingAlert(true);
     setReceivedAlert(null);
-
     setTimeout(() => {
       setIsSendingAlert(false);
       setReceivedAlert({
@@ -45,15 +43,12 @@ export default function InteractiveProjectCard({ project }) {
     }, 450);
   };
 
-  // Trigger hotspot prediction for MargSense
   const handlePredictHotspot = () => {
     setIsPredicting(true);
     setPredictedResult(null);
-
     const zoneObj = project.tryIt.zones.find(z => z.id === selectedZone) || project.tryIt.zones[0];
     setTimeout(() => {
       setIsPredicting(false);
-      // Small variation for realistic feel
       const risk = Math.min(98, Math.max(25, zoneObj.baseRisk + Math.floor(Math.random() * 7 - 3)));
       setPredictedResult({
         zone: zoneObj.name,
@@ -67,32 +62,110 @@ export default function InteractiveProjectCard({ project }) {
 
   const selectedStep = project.howItWorks[selectedStepIdx] || project.howItWorks[0];
 
+  // ── Derived inline styles for branded elements ──
+  const brandedStepActive = B ? {
+    background: B.lavender,
+    color: B.accent,
+    borderColor: B.accent,
+    boxShadow: `3px 3px 0 ${B.accent}`,
+  } : {};
+
+  const brandedModeBtnActive = B ? {
+    background: B.lavender,
+    color: B.accent,
+    borderColor: B.accent,
+    boxShadow: `3px 3px 0 ${B.accent}`,
+  } : {};
+
+  const brandedStoryBtnActive = B ? {
+    background: B.accent,
+    color: '#fff',
+    borderColor: '#111',
+    boxShadow: `3px 3px 0 #111`,
+  } : {};
+
   return (
-    <div className="interactive-project-card" style={{ boxShadow: `7px 7px 0 ${project.shadow}` }}>
-      {/* Top Banner: Number + Title + One-Sentence + Visual Tags */}
-      <div className="proj-card-top-bar">
+    <div
+      className={`interactive-project-card${B ? ' branded-card' : ''}`}
+      style={{ boxShadow: `7px 7px 0 ${project.shadow}` }}
+    >
+      {/* ── Campus Find Brand Logo Header ── */}
+      {B && (
+        <div
+          className="brand-logo-header"
+          style={{ background: B.surface, borderBottom: `2px solid ${B.lavender}` }}
+        >
+          <div className="brand-logo-left">
+            <img
+              src={B.logo}
+              alt={`${project.title} logo`}
+              className="brand-logo-img"
+            />
+          </div>
+          <div className="brand-identity-right">
+            <span
+              className="brand-product-label mono-font"
+              style={{ color: B.accent, borderColor: B.mid, background: B.lavender }}
+            >
+              PRODUCT
+            </span>
+            <p className="brand-tagline handwriting" style={{ color: B.accent }}>
+              "Lost something? Find it here."
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Top Banner: Number + Title + Tags ── */}
+      <div className="proj-card-top-bar" style={B ? { background: B.surface } : {}}>
         <div className="proj-title-cluster">
-          <span className="proj-number pixel-font">{project.num}</span>
+          <span className="proj-number pixel-font" style={B ? { color: B.mid } : {}}>
+            {project.num}
+          </span>
           <div>
-            <h3 className="proj-main-title">{project.title}</h3>
+            {/* Title: "Campus" plain + "Find" purple */}
+            {B ? (
+              <h3 className="proj-main-title">
+                Campus{' '}
+                <span style={{ color: B.accent }}>Find</span>
+              </h3>
+            ) : (
+              <h3 className="proj-main-title">{project.title}</h3>
+            )}
             <p className="proj-one-sentence">{project.oneSentence}</p>
           </div>
         </div>
 
-        {/* 3-4 Visual Tags */}
+        {/* Tags — lavender accent for branded projects */}
         <div className="proj-tags-list">
           {project.tags.map(tag => (
-            <span key={tag} className="proj-tag-pill">{tag}</span>
+            <span
+              key={tag}
+              className="proj-tag-pill"
+              style={B ? {
+                background: B.lavender,
+                color: B.accent,
+                borderColor: B.mid,
+                boxShadow: `2px 2px 0 ${B.accent}33`,
+              } : {}}
+            >
+              {tag}
+            </span>
           ))}
         </div>
       </div>
 
-      {/* Interactive Controls Row */}
-      <div className="proj-mode-selector-bar">
+      {/* ── Mode Selector Bar ── */}
+      <div
+        className="proj-mode-selector-bar"
+        style={B ? { background: `${B.surface}cc`, borderBottom: `2px dashed ${B.lavender}` } : {}}
+      >
         <div className="proj-mode-buttons">
+          {/* SEE HOW IT WORKS — purple filled when active for branded projects */}
           <button
             onClick={() => setActiveView('story')}
-            className={`proj-mode-btn ${activeView === 'story' ? 'active' : ''}`}
+            className={`proj-mode-btn${activeView === 'story' ? ' active' : ''}`}
+            style={activeView === 'story' && B ? brandedStoryBtnActive : {}}
           >
             <Sparkles size={13} />
             <span>SEE HOW IT WORKS</span>
@@ -100,7 +173,8 @@ export default function InteractiveProjectCard({ project }) {
 
           <button
             onClick={() => setActiveView('try')}
-            className={`proj-mode-btn ${activeView === 'try' ? 'active' : ''}`}
+            className={`proj-mode-btn${activeView === 'try' ? ' active' : ''}`}
+            style={activeView === 'try' && B ? brandedModeBtnActive : {}}
           >
             <Play size={12} />
             <span>TRY IT</span>
@@ -108,7 +182,8 @@ export default function InteractiveProjectCard({ project }) {
 
           <button
             onClick={() => setActiveView('notes')}
-            className={`proj-mode-btn ${activeView === 'notes' ? 'active' : ''}`}
+            className={`proj-mode-btn${activeView === 'notes' ? ' active' : ''}`}
+            style={activeView === 'notes' && B ? brandedModeBtnActive : {}}
           >
             <Lightbulb size={13} />
             <span>NOTEBOOK NOTES</span>
@@ -116,16 +191,26 @@ export default function InteractiveProjectCard({ project }) {
         </div>
 
         <div className="proj-external-links">
-          <a href={project.github} target="_blank" rel="noreferrer" className="proj-repo-link" title="Source Code">
+          <a
+            href={project.github}
+            target="_blank"
+            rel="noreferrer"
+            className="proj-repo-link"
+            style={B ? {
+              borderColor: B.mid,
+              color: B.accent,
+            } : {}}
+            title="Source Code"
+          >
             <GithubIcon size={14} />
             <span>GITHUB</span>
           </a>
         </div>
       </div>
 
-      {/* ───────────────────────────────────────────────────────────
-          VIEW 1: SEE HOW IT WORKS (Gentle Visual Story)
-          ─────────────────────────────────────────────────────────── */}
+      {/* ─────────────────────────────────────────────────────────
+          VIEW 1: SEE HOW IT WORKS
+          ───────────────────────────────────────────────────────── */}
       {activeView === 'story' && (
         <div className="proj-view-container visual-story-view">
           <div className="story-intro-line handwriting">
@@ -140,13 +225,19 @@ export default function InteractiveProjectCard({ project }) {
                 <React.Fragment key={step.step}>
                   <button
                     onClick={() => setSelectedStepIdx(idx)}
-                    className={`story-step-node ${isSelected ? 'active' : ''}`}
+                    className={`story-step-node${isSelected ? ' active' : ''}`}
+                    style={isSelected && B ? brandedStepActive : {}}
                   >
                     <span className="step-num-badge mono-font">{step.step}</span>
                     <strong className="step-node-title">{step.title}</strong>
                   </button>
                   {idx < project.howItWorks.length - 1 && (
-                    <span className="story-arrow">→</span>
+                    <span
+                      className="story-arrow"
+                      style={B && idx < selectedStepIdx ? { color: B.mid } : {}}
+                    >
+                      →
+                    </span>
                   )}
                 </React.Fragment>
               );
@@ -154,35 +245,66 @@ export default function InteractiveProjectCard({ project }) {
           </div>
 
           {/* Progressive Disclosure Card */}
-          <div className="story-step-explanation-box">
+          <div
+            className="story-step-explanation-box"
+            style={B ? {
+              background: B.surface,
+              borderColor: B.lavender,
+            } : {}}
+          >
             <div className="step-exp-header">
-              <span className="step-exp-badge mono-font">STEP 0{selectedStep.step}</span>
+              <span
+                className="step-exp-badge mono-font"
+                style={B ? {
+                  background: B.lavender,
+                  color: B.accent,
+                  border: `1px solid ${B.mid}`,
+                } : {}}
+              >
+                STEP 0{selectedStep.step}
+              </span>
               <h4 className="step-exp-title">{selectedStep.title}</h4>
             </div>
 
-            {/* Simple explanation first */}
             <p className="step-simple-text">{selectedStep.simple}</p>
 
-            {/* Technical disclosure second */}
-            <div className="step-tech-disclosure">
+            {/* Under the hood — purple accent for branded projects */}
+            <div
+              className="step-tech-disclosure"
+              style={B ? { borderTopColor: B.lavender } : {}}
+            >
               <span className="mono-font tech-tag-label">Under the hood:</span>
-              <span className="mono-font tech-tag-val">{selectedStep.tech}</span>
+              <span
+                className="mono-font tech-tag-val"
+                style={B ? {
+                  color: B.accent,
+                  background: B.lavender,
+                  border: `1px solid ${B.mid}`,
+                } : {}}
+              >
+                {selectedStep.tech}
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* ───────────────────────────────────────────────────────────
-          VIEW 2: TRY IT (One Small Interactive Mini-Demo)
-          ─────────────────────────────────────────────────────────── */}
+      {/* ─────────────────────────────────────────────────────────
+          VIEW 2: TRY IT
+          ───────────────────────────────────────────────────────── */}
       {activeView === 'try' && (
         <div className="proj-view-container try-it-view">
           <div className="try-it-header">
-            <span className="interactive-badge mono-font">● INTERACTIVE DEMONSTRATION</span>
+            <span
+              className="interactive-badge mono-font"
+              style={B ? { color: B.accent } : {}}
+            >
+              ● INTERACTIVE DEMONSTRATION
+            </span>
             <span className="try-it-subtext handwriting">experience the core feature directly</span>
           </div>
 
-          {/* Campus Find Demo: Send test notification */}
+          {/* Campus Find Demo */}
           {project.tryIt.type === 'notification' && (
             <div className="demo-canvas notification-demo-canvas">
               <div className="demo-input-cluster">
@@ -194,11 +316,29 @@ export default function InteractiveProjectCard({ project }) {
                     onChange={(e) => setTestItemName(e.target.value)}
                     placeholder="e.g. Blue Umbrella in Tech Park"
                     className="demo-text-input mono-font"
+                    style={B ? { borderColor: B.lavender } : {}}
                   />
                   <button
                     onClick={handleSendTestNotification}
                     disabled={isSendingAlert}
-                    className="btn btn-accent demo-action-btn"
+                    className="demo-action-btn"
+                    style={B ? {
+                      background: B.accent,
+                      color: '#fff',
+                      border: '2.5px solid #111',
+                      boxShadow: '4px 4px 0 #111',
+                      padding: '0.55rem 1.1rem',
+                      borderRadius: '6px',
+                      fontWeight: 800,
+                      fontSize: '0.82rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      cursor: isSendingAlert ? 'not-allowed' : 'pointer',
+                      opacity: isSendingAlert ? 0.7 : 1,
+                      fontFamily: 'Inter, sans-serif',
+                      transition: 'all 0.15s ease',
+                    } : {}}
                   >
                     <Bell size={14} />
                     <span>{isSendingAlert ? 'Emitting...' : project.tryIt.buttonText}</span>
@@ -206,9 +346,17 @@ export default function InteractiveProjectCard({ project }) {
                 </div>
               </div>
 
-              {/* Live Toast alert display */}
+              {/* Live alert display */}
               {receivedAlert ? (
-                <div className="simulated-alert-box animated-alert">
+                <div
+                  className="simulated-alert-box animated-alert"
+                  style={B ? {
+                    background: B.surface,
+                    borderColor: B.mid,
+                    borderLeftColor: B.accent,
+                    borderLeftWidth: '4px',
+                  } : {}}
+                >
                   <div className="alert-top">
                     <span className="alert-bell-icon">🔔</span>
                     <strong className="alert-title">{receivedAlert.title}</strong>
@@ -219,7 +367,12 @@ export default function InteractiveProjectCard({ project }) {
                   </p>
                   <div className="alert-footer mono-font">
                     <span>Transport: {receivedAlert.channel}</span>
-                    <span className="badge-online">STATUS: DELIVERED</span>
+                    <span
+                      className="badge-online"
+                      style={B ? { background: B.lavender, color: B.accent, borderColor: B.mid } : {}}
+                    >
+                      STATUS: DELIVERED
+                    </span>
                   </div>
                 </div>
               ) : (
@@ -230,7 +383,7 @@ export default function InteractiveProjectCard({ project }) {
             </div>
           )}
 
-          {/* MargSense Demo: Predict Hotspot */}
+          {/* MargSense Demo */}
           {project.tryIt.type === 'hotspot' && (
             <div className="demo-canvas hotspot-demo-canvas">
               <div className="hotspot-zones-grid">
@@ -260,7 +413,6 @@ export default function InteractiveProjectCard({ project }) {
                 </button>
               </div>
 
-              {/* Prediction Result */}
               {predictedResult ? (
                 <div className="simulated-prediction-box animated-alert">
                   <div className="pred-score-bar">
@@ -287,38 +439,41 @@ export default function InteractiveProjectCard({ project }) {
         </div>
       )}
 
-      {/* ───────────────────────────────────────────────────────────
-          VIEW 3: NOTEBOOK DETAILS (1–3 Sentence Handwritten Notes)
-          ─────────────────────────────────────────────────────────── */}
+      {/* ─────────────────────────────────────────────────────────
+          VIEW 3: NOTEBOOK NOTES
+          ───────────────────────────────────────────────────────── */}
       {activeView === 'notes' && (
         <div className="proj-view-container notebook-notes-view">
           <div className="notebook-stickers-grid">
-            {/* Why I built this */}
-            <div className="notebook-sticky sticky-why">
-              <div className="sticky-pin" />
+            <div className={`notebook-sticky sticky-why${B ? ' branded-sticky' : ''}`}
+              style={B ? { background: B.surface, borderColor: B.lavender } : {}}
+            >
+              <div className="sticky-pin" style={B ? { background: B.mid } : {}} />
               <div className="sticky-header">
-                <Lightbulb size={16} className="sticky-icon" />
-                <h5 className="sticky-title mono-font">WHY I BUILT THIS</h5>
+                <Lightbulb size={16} className="sticky-icon" style={B ? { color: B.accent } : {}} />
+                <h5 className="sticky-title mono-font" style={B ? { color: B.accent } : {}}>WHY I BUILT THIS</h5>
               </div>
               <p className="sticky-text">{project.notebookNotes.why}</p>
             </div>
 
-            {/* What I learned */}
-            <div className="notebook-sticky sticky-learned">
-              <div className="sticky-pin" />
+            <div className={`notebook-sticky sticky-learned${B ? ' branded-sticky' : ''}`}
+              style={B ? { background: '#fff', borderColor: B.lavender } : {}}
+            >
+              <div className="sticky-pin" style={B ? { background: B.accent } : {}} />
               <div className="sticky-header">
-                <Pin size={16} className="sticky-icon" />
-                <h5 className="sticky-title mono-font">WHAT I LEARNED</h5>
+                <Pin size={16} className="sticky-icon" style={B ? { color: B.mid } : {}} />
+                <h5 className="sticky-title mono-font" style={B ? { color: B.mid } : {}}>WHAT I LEARNED</h5>
               </div>
               <p className="sticky-text">{project.notebookNotes.learned}</p>
             </div>
 
-            {/* Something I had to fix */}
-            <div className="notebook-sticky sticky-fixed">
-              <div className="sticky-pin" />
+            <div className={`notebook-sticky sticky-fixed${B ? ' branded-sticky' : ''}`}
+              style={B ? { background: B.lavender, borderColor: B.mid } : {}}
+            >
+              <div className="sticky-pin" style={B ? { background: B.accent } : {}} />
               <div className="sticky-header">
-                <AlertTriangle size={16} className="sticky-icon" />
-                <h5 className="sticky-title mono-font">SOMETHING I HAD TO FIX</h5>
+                <AlertTriangle size={16} className="sticky-icon" style={B ? { color: B.accent } : {}} />
+                <h5 className="sticky-title mono-font" style={B ? { color: B.accent } : {}}>SOMETHING I HAD TO FIX</h5>
               </div>
               <p className="sticky-text">{project.notebookNotes.fixed}</p>
             </div>

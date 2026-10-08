@@ -1,10 +1,18 @@
-import heroImg from '../assets/hero.png';
+import campusFindLogo from '../assets/campus-find-logo.jpg';
 
 export const projectsData = [
   {
     id: 'campus-find',
     num: '01',
-    shadow: 'var(--blue)',
+    shadow: '#7c3aed',           // Campus Find deep purple shadow
+    brand: {
+      id: 'campus-find',
+      logo: campusFindLogo,
+      accent: '#7c3aed',         // deep purple — primary emphasis
+      mid: '#a78bfa',            // medium purple — interactive
+      lavender: '#ede9fe',       // soft lavender — backgrounds
+      surface: '#f5f3ff',        // very light lavender — subtle surfaces
+    },
     title: 'Campus Find',
     oneSentence: 'Lost & Found platform for university communities.',
     brief: 'Lost & Found platform for university communities.',
@@ -12,7 +20,7 @@ export const projectsData = [
     stack: ['MongoDB', 'Express.js', 'React.js', 'Node.js', 'Socket.IO', 'JWT'],
     github: 'https://github.com/Kriti-2/lost-and-found-hub',
     demo: 'https://campusfind.demo',
-    img: heroImg,
+    img: campusFindLogo,
 
     // Step-by-step simple visual story (Progressive Disclosure)
     howItWorks: [
