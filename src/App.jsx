@@ -1,27 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Mail, Database, Layout, 
-  ExternalLink, Award, GraduationCap, Trophy, Check, Copy, 
-  ChevronDown, ChevronUp, Terminal, Cpu, BookOpen, Layers, 
-  Phone, Globe, CheckCircle2, ArrowUpRight, GitBranch, MapPin, 
-  ChevronRight, Moon, Sun, Play, RotateCcw, Sparkles, UserCheck, X
+import {
+  Mail, Award, GraduationCap, Trophy, Check, Copy,
+  Terminal, Layers, Phone, Globe, CheckCircle2, ArrowUpRight,
+  MapPin, X, Menu
 } from 'lucide-react';
 
 import profileImg from './assets/kriti.jpg';
 import './App.css';
 
-// Single Source of Truth Modules
 import { projectsData } from './data/projects';
 import { proofOfSkills } from './data/skills';
 import { credentialsData } from './data/credentials';
-import { buildNotesData } from './data/buildNotes';
 
-// Interactive Components
 import InteractiveProjectCard from './components/InteractiveProjectCard';
 import BuildNotes from './components/BuildNotes';
-import TerminalConsole from './components/TerminalConsole';
-import RecruiterMode from './components/RecruiterMode';
-import NotebookIntro from './components/NotebookIntro';
 
 /* ── Inline SVG icons ── */
 const Github = ({ size = 20, ...p }) => (
@@ -41,32 +33,9 @@ const Linkedin = ({ size = 20, ...p }) => (
 );
 
 export default function App() {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('portfolio-theme') || 'light';
-  });
-
-  // Show intro only once per browser session (sessionStorage = cleared on tab close)
-  const [showIntro, setShowIntro] = useState(() => {
-    return !sessionStorage.getItem('nb-intro-seen');
-  });
-
-  const handleIntroEnter = () => {
-    sessionStorage.setItem('nb-intro-seen', '1');
-    setShowIntro(false);
-  };
-
-  const [recruiterMode, setRecruiterMode] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [activeNav, setActiveNav] = useState('home');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('portfolio-theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText('kritigup251@gmail.com');
@@ -76,36 +45,35 @@ export default function App() {
 
   const scrollToSection = (sectionId) => {
     setActiveNav(sectionId);
+    setMobileMenuOpen(false);
     const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Close mobile menu on outside click
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const close = (e) => {
+      if (!e.target.closest('.navbar') && !e.target.closest('.mobile-nav-drawer')) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [mobileMenuOpen]);
+
+  const NAV_LINKS = [
+    { id: 'projects',     label: 'PROJECTS' },
+    { id: 'skills',       label: 'SKILLS' },
+    { id: 'about',        label: 'ABOUT' },
+    { id: 'credentials',  label: 'CREDENTIALS' },
+    { id: 'contact',      label: 'CONTACT' },
+  ];
 
   return (
     <div className="app-container">
 
-      {/* ── Notebook Intro (shown once per session) ── */}
-      {showIntro && (
-        <NotebookIntro 
-          onEnter={handleIntroEnter} 
-          theme={theme} 
-          onToggleTheme={toggleTheme} 
-        />
-      )}
-
-      {/* ── Recruiter Mode Modal View (30-Second Skim) ── */}
-      {recruiterMode && (
-        <RecruiterMode
-          onClose={() => setRecruiterMode(false)}
-          onSelectProject={(num) => {
-            setRecruiterMode(false);
-            scrollToSection('projects');
-          }}
-        />
-      )}
-
-      {/* ── Fixed Toast Notice for Copy ── */}
+      {/* ── Email copied toast ── */}
       {copiedEmail && (
         <div className="toast-notification">
           <CheckCircle2 size={18} color="#15803d" />
@@ -113,89 +81,84 @@ export default function App() {
         </div>
       )}
 
-      {/* ── Uncluttered 3-Zone Sticky Navbar ── */}
+      {/* ── Navbar ── */}
       <nav className="navbar">
-        {/* Left: Brand / Home Anchor */}
         <a href="#home" onClick={() => setActiveNav('home')} className="nav-brand" title="Home">
           <span className="nav-brand-dot"></span>
           <span className="pixel-font nav-brand-text">KRITI GUPTA</span>
           <span className="nav-brand-pill mono-font">CS '27</span>
         </a>
 
-        {/* Center: Clean Core Navigation Links */}
         <div className="nav-links">
-          <a href="#projects" onClick={() => setActiveNav('projects')} className={`nav-item ${activeNav === 'projects' ? 'active' : ''}`}>PROJECTS</a>
-          <a href="#build-notes" onClick={() => setActiveNav('build-notes')} className={`nav-item ${activeNav === 'build-notes' ? 'active' : ''}`}>BUILD NOTES</a>
-          <a href="#skills" onClick={() => setActiveNav('skills')} className={`nav-item ${activeNav === 'skills' ? 'active' : ''}`}>SKILLS</a>
-          <a href="#about" onClick={() => setActiveNav('about')} className={`nav-item ${activeNav === 'about' ? 'active' : ''}`}>ABOUT</a>
-          <a href="#terminal" onClick={() => setActiveNav('terminal')} className={`nav-item ${activeNav === 'terminal' ? 'active' : ''}`}>CONSOLE</a>
-          <a href="#credentials" onClick={() => setActiveNav('credentials')} className={`nav-item ${activeNav === 'credentials' ? 'active' : ''}`}>CREDENTIALS</a>
+          {NAV_LINKS.map(({ id, label }) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              onClick={() => scrollToSection(id)}
+              className={`nav-item ${activeNav === id ? 'active' : ''}`}
+            >
+              {label}
+            </a>
+          ))}
         </div>
 
-        {/* Right: Compact Actions Cluster */}
         <div className="nav-actions">
-          {/* Recruiter Mode Button */}
-          <button 
-            onClick={() => setRecruiterMode(true)} 
-            className="recruiter-toggle-btn" 
-            title="Open 30-Second Recruiter Summary"
-          >
-            <UserCheck size={14} />
-            <span>RECRUITER</span>
-          </button>
-
-          {/* Compact Circular Badges for Socials */}
-          <a 
-            href="https://linkedin.com/in/Kritigupta251" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="nav-icon-badge bg-yellow" 
-            title="LinkedIn Profile: Kritigupta251"
-          >
+          <a href="https://linkedin.com/in/Kritigupta251" target="_blank" rel="noreferrer"
+            className="nav-icon-badge bg-yellow" title="LinkedIn">
             <Linkedin size={15} />
           </a>
-
-          <a 
-            href="https://github.com/Kriti-2" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="nav-icon-badge bg-pink" 
-            title="GitHub Profile: Kriti-2"
-          >
+          <a href="https://github.com/Kriti-2" target="_blank" rel="noreferrer"
+            className="nav-icon-badge bg-pink" title="GitHub">
             <Github size={15} />
           </a>
-
-          {/* Light / Dark Mode Toggle */}
-          <button 
-            onClick={toggleTheme} 
-            className="nav-icon-badge nav-theme-btn" 
-            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-          >
-            {theme === 'light' ? <Moon size={15} /> : <Sun size={15} color="#fcd34d" />}
-          </button>
-
-          {/* Quick Copy Email Button */}
-          <button 
-            onClick={copyToClipboard} 
-            className="btn btn-primary nav-copy-btn" 
-            title="Copy email: kritigup251@gmail.com"
-          >
+          <button onClick={copyToClipboard} className="btn btn-primary nav-copy-btn nav-email-btn" title="Copy email">
             {copiedEmail ? <Check size={13} color="#15803d" /> : <Copy size={13} />}
             <span className="copy-btn-text">{copiedEmail ? 'COPIED' : 'EMAIL'}</span>
+          </button>
+          <button className="hamburger-btn" onClick={() => setMobileMenuOpen(o => !o)}
+            aria-label="Toggle menu" aria-expanded={mobileMenuOpen}>
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
-      {/* ── HOME: Simplified, Grounded Hero ── */}
+      {/* ── Mobile drawer ── */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav-drawer" role="dialog">
+          <div className="mobile-nav-links">
+            {NAV_LINKS.map(({ id, label }) => (
+              <a key={id} href={`#${id}`}
+                className={`mobile-nav-item ${activeNav === id ? 'active' : ''}`}
+                onClick={() => scrollToSection(id)}>
+                {label}
+              </a>
+            ))}
+          </div>
+          <div className="mobile-nav-actions">
+            <div className="mobile-nav-socials">
+              <a href="https://linkedin.com/in/Kritigupta251" target="_blank" rel="noreferrer"
+                className="nav-icon-badge bg-yellow"><Linkedin size={18} /></a>
+              <a href="https://github.com/Kriti-2" target="_blank" rel="noreferrer"
+                className="nav-icon-badge bg-pink"><Github size={18} /></a>
+              <button onClick={() => { copyToClipboard(); setMobileMenuOpen(false); }}
+                className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
+                {copiedEmail ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
+                {copiedEmail ? 'COPIED' : 'COPY EMAIL'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── HERO ── */}
       <header id="home" className="hero">
         <div className="hero-top-badge">
           <span className="status-dot"></span>
-          <span>SRM IST B.Tech CSE (2023–2027) · CGPA 9.0/10.0</span>
+          <span>SRM IST · B.Tech CSE (2023–2027) · CGPA 9.0/10.0</span>
         </div>
 
         <p className="handwriting hero-eyebrow">Hi there, I am</p>
 
-        {/* Structured Neo-Brutalist Developer Card */}
         <div className="hero-name-box">
           <div className="hero-window-bar">
             <div className="window-dots">
@@ -203,26 +166,20 @@ export default function App() {
               <span className="window-dot dot-yellow"></span>
               <span className="window-dot dot-green"></span>
             </div>
-            <span className="window-title">KRITI_GUPTA // NOTEBOOK</span>
+            <span className="window-title">KRITI_GUPTA.portfolio</span>
           </div>
-
           <div className="hero-name-content">
             <h1 className="hero-name pixel-font">KRITI GUPTA</h1>
             <div className="hero-tagline-bar">
-              Full-Stack Applications · Real-Time Systems · Data &amp; AI
+              Full-Stack · Real-Time Systems · Data &amp; AI
             </div>
           </div>
         </div>
 
-        {/* Concise Positioning Requested by User */}
         <h2 className="hero-headline">
           "I build software that solves real problems."
         </h2>
-        <p className="hero-supporting-line mono-font">
-          Full-stack applications • Real-time systems • Data &amp; AI
-        </p>
 
-        {/* Quick Credentials & Badges */}
         <div className="hero-pills">
           <span className="hero-pill bg-yellow">
             <MapPin size={13} style={{ marginRight: 5 }} /> Ghaziabad, UP, India
@@ -233,33 +190,32 @@ export default function App() {
           <span className="hero-pill bg-pink">
             <Award size={13} style={{ marginRight: 5 }} /> NPTEL Certified · NLP
           </span>
-          <a href="https://kriti2.tech" target="_blank" rel="noreferrer" className="hero-pill bg-blue" style={{ color: 'white', textDecoration: 'none' }}>
+          <a href="https://kriti2.tech" target="_blank" rel="noreferrer"
+            className="hero-pill bg-blue" style={{ color: 'white', textDecoration: 'none' }}>
             <Globe size={13} style={{ marginRight: 5 }} /> kriti2.tech
           </a>
         </div>
 
-        {/* Primary & Secondary CTAs */}
         <div className="hero-buttons">
-          <a href="#projects" className="btn btn-accent btn-large">
+          <a href="#projects" className="btn btn-accent btn-large" onClick={() => scrollToSection('projects')}>
             <Layers size={17} /> Explore my work
           </a>
-          <a href="#terminal" className="btn btn-primary btn-large">
-            <Terminal size={17} /> Try the console
+          <a href="#contact" className="btn btn-primary btn-large" onClick={() => scrollToSection('contact')}>
+            <Mail size={17} /> Get in touch
           </a>
         </div>
       </header>
 
-      {/* ── PROJECTS: Main Focus of Portfolio ── */}
+      {/* ── PROJECTS ── */}
       <section id="projects" className="section-inner projects-section">
         <div className="section-label-wrapper">
           <div className="section-label pixel-font">
             <span className="section-num">01.</span> FEATURED PROJECTS
           </div>
           <span className="section-subtext handwriting">
-            what I've built — follow the visual story, try the interactive concept demo, or read notebook notes
+            things I've built — each card shows the story, the stack, and what I learned
           </span>
         </div>
-
         <div className="projects-stack-container">
           {projectsData.map((project) => (
             <InteractiveProjectCard key={project.id} project={project} />
@@ -267,10 +223,10 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── BUILD NOTES: Authentic Handwritten Notebook Annotations ── */}
+      {/* ── BUILD NOTES ── */}
       <BuildNotes />
 
-      {/* ── PROOF OF SKILLS: Technology → Where I Used It ── */}
+      {/* ── SKILLS ── */}
       <section id="skills" className="section-inner skills-section">
         <div className="section-label-wrapper">
           <div className="section-label pixel-font">
@@ -297,24 +253,23 @@ export default function App() {
           ))}
         </div>
 
-        {/* CS Foundations Box */}
         <div className="competency-box">
           <div className="competency-header">
             <Terminal size={18} />
-            <span className="pixel-font competency-title">CORE COMPUTER SCIENCE DISCIPLINES</span>
+            <span className="pixel-font competency-title">CORE CS DISCIPLINES</span>
           </div>
           <div className="competency-tags">
             <span className="comp-tag">Object-Oriented Programming (OOP)</span>
             <span className="comp-tag">Data Structures &amp; Algorithms</span>
-            <span className="comp-tag">RESTful API Design &amp; Contracts</span>
+            <span className="comp-tag">RESTful API Design</span>
             <span className="comp-tag">Relational Database Normalization</span>
             <span className="comp-tag">Continuous Integration &amp; Git Flow</span>
-            <span className="comp-tag">Software Development Life Cycle (SDLC)</span>
+            <span className="comp-tag">Software Development Life Cycle</span>
           </div>
         </div>
       </section>
 
-      {/* ── ABOUT: Clean, Simple, Professional ── */}
+      {/* ── ABOUT ── */}
       <section id="about" className="section-inner about-section">
         <div className="section-label-wrapper">
           <div className="section-label pixel-font">
@@ -326,7 +281,6 @@ export default function App() {
         </div>
 
         <div className="about-clean-layout">
-          {/* Photo Column */}
           <div className="about-photo-col">
             <div className="about-photo-card">
               <div className="tape" />
@@ -339,12 +293,10 @@ export default function App() {
             </span>
           </div>
 
-          {/* Bio Column */}
           <div className="about-bio-col">
             <h3 className="about-name-heading pixel-font">HI, I'M KRITI</h3>
-
             <p className="about-bio-text">
-              I'm a 4th-year Computer Science student at <strong>SRM IST</strong> (CGPA 9.0/10.0),
+              I'm a Computer Science student at <strong>SRM IST</strong> (CGPA 9.0/10.0),
               building full-stack web apps, real-time systems, and data pipelines.
               I care about writing software that's reliable, readable, and actually solves the problem.
             </p>
@@ -353,7 +305,6 @@ export default function App() {
               backend&nbsp;/&nbsp;full-stack roles.
             </p>
 
-            {/* Quick Facts */}
             <div className="about-facts-row">
               <div className="about-fact">
                 <span className="about-fact-label">University</span>
@@ -373,7 +324,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Tech stack chips */}
             <div className="about-stack-row">
               <span className="about-stack-label mono-font">Currently working with →</span>
               <div className="about-stack-chips">
@@ -386,25 +336,16 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── CONSOLE: Fun Secondary Interactive Feature ── */}
-      <TerminalConsole
-        onOpenTrace={() => scrollToSection('projects')}
-        onSelectProject={() => scrollToSection('projects')}
-        onToggleRecruiterMode={() => setRecruiterMode(true)}
-        onNavigate={scrollToSection}
-      />
-
-      {/* ── CREDENTIALS & BACKGROUND ── */}
+      {/* ── CREDENTIALS ── */}
       <section id="credentials" className="section-inner">
         <div className="section-label-wrapper">
           <div className="section-label pixel-font">
-            <span className="section-num">06.</span> CREDENTIALS &amp; BACKGROUND
+            <span className="section-num">05.</span> CREDENTIALS
           </div>
-          <span className="section-subtext handwriting">verified certifications, hackathons &amp; academic record</span>
+          <span className="section-subtext handwriting">certifications, hackathons &amp; academic record</span>
         </div>
 
         <div className="credentials-grid">
-          {/* Column 1: Certification & Hackathon */}
           <div className="credential-col">
             {credentialsData.certifications.map((cert, cIdx) => (
               <div key={cIdx} className="cred-card cert-card">
@@ -418,11 +359,9 @@ export default function App() {
                     <p className="cred-issuer">{cert.issuer} · {cert.year}</p>
                   </div>
                 </div>
-
                 <p className="cred-desc">
                   Completed an intensive <strong>{cert.duration}</strong> curriculum covering sequence modeling, word vectors, and modern transformer architectures:
                 </p>
-
                 <div className="cert-syllabus-box">
                   {cert.topics.map((topic, tIdx) => (
                     <div key={tIdx} className="syllabus-item">
@@ -446,18 +385,15 @@ export default function App() {
                     <p className="cred-issuer">{achv.standing}</p>
                   </div>
                 </div>
-
                 <div className="achievement-highlight-box">
                   <span className="stat-big pixel-font">Top 1,600</span>
                   <span className="stat-sub">Teams advanced out of <strong>11,000+</strong> participating teams pan-India</span>
                 </div>
-
                 <p className="cred-desc">{achv.description}</p>
               </div>
             ))}
           </div>
 
-          {/* Column 2: Education Timeline */}
           <div className="credential-col">
             <div className="cred-card edu-card">
               <div className="cred-card-top">
@@ -470,7 +406,6 @@ export default function App() {
                   <p className="cred-issuer">Computer Science &amp; Schooling</p>
                 </div>
               </div>
-
               <div className="edu-timeline">
                 {credentialsData.education.map((edu, eIdx) => (
                   <div key={eIdx} className={`timeline-item ${eIdx === 0 ? 'featured-edu' : ''}`}>
@@ -480,9 +415,7 @@ export default function App() {
                       <h4 className="edu-inst">{edu.institution}</h4>
                       <p className="edu-loc">{edu.location}</p>
                       <p className="edu-degree"><strong>{edu.degree}</strong></p>
-                      <div className="cgpa-pill">
-                        <strong>{edu.metric}</strong>
-                      </div>
+                      <div className="cgpa-pill"><strong>{edu.metric}</strong></div>
                       {edu.coursework && (
                         <p className="edu-courses">Relevant Coursework: {edu.coursework}</p>
                       )}
@@ -505,7 +438,7 @@ export default function App() {
           </div>
 
           <p className="contact-lead">
-            Whether you have an internship opportunity, a software engineering project, or want to talk API design and real-time systems — my inbox is always open.
+            Whether you have an internship opportunity, a software engineering project, or just want to say hi — my inbox is always open.
           </p>
 
           <div className="contact-channels-grid">
@@ -547,14 +480,11 @@ export default function App() {
           </div>
 
           <div className="contact-actions-footer">
-            <button onClick={copyToClipboard} className="btn btn-primary btn-large">
-              {copiedEmail ? <Check size={16} color="#15803d" /> : <Copy size={16} />}
+            <button onClick={copyToClipboard} className="btn btn-accent btn-large">
+              {copiedEmail ? <Check size={16} color="#111" /> : <Copy size={16} />}
               {copiedEmail ? 'Email Copied!' : 'Copy Email Address'}
             </button>
-            <button onClick={() => setRecruiterMode(true)} className="btn btn-accent btn-large">
-              <UserCheck size={16} /> Open Recruiter Mode
-            </button>
-            <a href="https://kriti2.tech" target="_blank" rel="noreferrer" className="btn btn-secondary btn-large">
+            <a href="https://kriti2.tech" target="_blank" rel="noreferrer" className="btn btn-primary btn-large">
               <Globe size={16} /> Visit kriti2.tech
             </a>
           </div>
@@ -568,7 +498,7 @@ export default function App() {
           <p className="footer-sub">Kriti Gupta · Computer Science Engineering Student @ SRM IST</p>
         </div>
         <div className="footer-right">
-          <span className="footer-copy">© {new Date().getFullYear()} Kriti Gupta · Interactive Engineering Notebook</span>
+          <span className="footer-copy">© {new Date().getFullYear()} Kriti Gupta</span>
         </div>
       </footer>
 

@@ -12,27 +12,13 @@
   --box-shadow:      #111111;
   --terminal-bg:     #0f172a;
   --terminal-border: #111111;
-  
+
   --yellow:          #fcd34d;
   --green:           #4ade80;
   --pink:            #f472b6;
   --blue:            #3b82f6;
   --purple:          #a855f7;
   --orange:          #fb923c;
-}
-
-[data-theme="dark"] {
-  --bg-color:        #0b0f19;
-  --line-color:      rgba(255, 255, 255, 0.07);
-  --margin-line:     #38bdf8;
-  --text-main:       #f8fafc;
-  --text-muted:      #94a3b8;
-  --card-bg:         #151d30;
-  --card-border:     #2a374f;
-  --nav-bg:          rgba(11, 15, 25, 0.94);
-  --box-shadow:      #000000;
-  --terminal-bg:     #090d16;
-  --terminal-border: #334155;
 }
 
 *, *::before, *::after {
@@ -43,7 +29,6 @@
 
 html {
   scroll-behavior: smooth;
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* Notebook ruled paper background */
@@ -55,8 +40,6 @@ body {
   color: var(--text-main);
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
-  transition: background-color 0.25s ease, color 0.25s ease;
-  position: relative;
 }
 
 .handwriting {
@@ -84,7 +67,6 @@ body::before {
   background-color: var(--margin-line);
   z-index: 1;
   pointer-events: none;
-  transition: background-color 0.25s ease;
   box-shadow: 0 0 4px rgba(248, 113, 113, 0.3);
 }
 
@@ -92,6 +74,7 @@ body::before {
   body::before { left: 10%; }
 }
 
-[data-theme="dark"] body::before {
-  box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
+@media (max-width: 480px) {
+  body::before { display: none; }
+  body { background-size: 100% 28px; }
 }
